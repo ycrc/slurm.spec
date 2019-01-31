@@ -1,5 +1,5 @@
 # Upstream tarballs use an additional release number
-%global ups_rel 1
+%global ups_rel 2
 
 %if "%{ups_rel}" == "1"
 %global name_version %{name}-%{version}
@@ -12,7 +12,7 @@
 
 Name:           slurm
 Version:        17.11.13
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -722,6 +722,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Thu Jan 31 2019 Philip Kovacs <pkdevel@yahoo.com> - 17.11.13-2
+- Fix build issue on 32-bit architectures
+
 * Wed Jan 30 2019 Philip Kovacs <pkdevel@yahoo.com> - 17.11.13-1
 - Release of 17.11.13
 - Closes security issue CVE-2019-6438

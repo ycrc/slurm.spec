@@ -1,5 +1,5 @@
 diff --git a/etc/slurmctld.service.in b/etc/slurmctld.service.in
-index ebf92b0da4..d13a653339 100644
+index 6f175ad651..82a128ac0a 100644
 --- a/etc/slurmctld.service.in
 +++ b/etc/slurmctld.service.in
 @@ -8,7 +8,7 @@ Type=forking
@@ -8,11 +8,11 @@ index ebf92b0da4..d13a653339 100644
  ExecReload=/bin/kill -HUP $MAINPID
 -PIDFile=/var/run/slurmctld.pid
 +PIDFile=/var/run/slurm/slurmctld.pid
+ LimitNOFILE=65536
  @SYSTEMD_TASKSMAX_OPTION@
  
- [Install]
 diff --git a/etc/slurmd.service.in b/etc/slurmd.service.in
-index 2e20bb33a3..263bd8aa77 100644
+index b36433dd7d..146b6574d2 100644
 --- a/etc/slurmd.service.in
 +++ b/etc/slurmd.service.in
 @@ -8,7 +8,7 @@ Type=forking
@@ -22,10 +22,10 @@ index 2e20bb33a3..263bd8aa77 100644
 -PIDFile=/var/run/slurmd.pid
 +PIDFile=/var/run/slurm/slurmd.pid
  KillMode=process
- LimitNOFILE=51200
+ LimitNOFILE=131072
  LimitMEMLOCK=infinity
 diff --git a/etc/slurmdbd.service.in b/etc/slurmdbd.service.in
-index 5f8f73c7f1..a0aede6feb 100644
+index c80feb9d7c..97a95c0e57 100644
 --- a/etc/slurmdbd.service.in
 +++ b/etc/slurmdbd.service.in
 @@ -8,7 +8,7 @@ Type=forking
@@ -34,6 +34,6 @@ index 5f8f73c7f1..a0aede6feb 100644
  ExecReload=/bin/kill -HUP $MAINPID
 -PIDFile=/var/run/slurmdbd.pid
 +PIDFile=/var/run/slurm/slurmdbd.pid
+ LimitNOFILE=65536
  @SYSTEMD_TASKSMAX_OPTION@
  
- [Install]

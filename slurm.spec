@@ -11,8 +11,8 @@
 %undefine _strict_symbol_defs_build
 
 Name:           slurm
-Version:        17.11.13
-Release:        2%{?dist}
+Version:        18.08.5
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -25,6 +25,8 @@ Source5:        slurm-setuser.in
 
 # Upstream bug #4449: release-style versioning of libslurmfull
 Patch0:         slurm_libslurmfull_version.patch
+# Upstream bug #6442 xhash_init signature change breaks xhash_test.c
+Patch1:         slurm_testsuite_xhash.patch
 
 # Build-related patches
 Patch10:        slurm_perlapi_rpaths.patch
@@ -190,6 +192,7 @@ Torque wrapper scripts used for helping migrate from Torque/PBS to Slurm.
 %prep
 %setup -q -n %{name_version}
 %patch0 -p1
+%patch1 -p1
 %patch10 -p1
 %patch11 -p1
 %patch12 -p1
@@ -266,8 +269,6 @@ install -m 0644 -p etc/cgroup.conf.example \
     %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/cgroup.conf.example \
     %{buildroot}%{_sysconfdir}/%{name}/cgroup.conf
-install -m 0644 -p etc/cgroup_allowed_devices_file.conf.example \
-    %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/layouts.d.power.conf.example \
     %{buildroot}%{_sysconfdir}/%{name}/layouts.d/power.conf.example
 install -m 0644 -p etc/layouts.d.power_cpufreq.conf.example \
@@ -278,7 +279,6 @@ install -m 0644 -p etc/slurm.conf %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/slurm.conf.example %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/slurmdbd.conf %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/slurmdbd.conf.example %{buildroot}%{_sysconfdir}/%{name}
-install -m 0644 -p etc/slurm.epilog.clean %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/slurmctld.service %{buildroot}%{_unitdir}
 install -m 0644 -p etc/slurmd.service %{buildroot}%{_unitdir}
 install -m 0644 -p etc/slurmdbd.service %{buildroot}%{_unitdir}
@@ -444,18 +444,17 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %dir %{_var}/spool/%{name}
 %dir %{_var}/spool/%{name}/ctld
 %dir %{_var}/spool/%{name}/d
-%attr(0755,root,root) %{_sysconfdir}/%{name}/slurm.epilog.clean
-%config(noreplace) %{_sysconfdir}/%{name}/cgroup*.conf
+%config(noreplace) %{_sysconfdir}/%{name}/cgroup.conf
 %config(noreplace) %{_sysconfdir}/%{name}/slurm.conf
 %{_bindir}/{sacct,sacctmgr,salloc,sattach,sbatch,sbcast}
 %{_bindir}/{scancel,scontrol,sdiag,sh5util,sinfo,sprio}
 %{_bindir}/{squeue,sreport,srun,sshare,sstat,strigger}
 %{_bindir}/%{name}-setuser
 %{_libdir}/%{name}/accounting_storage_{filetxt,none,slurmdbd}.so
-%{_libdir}/%{name}/acct_gather_energy_{ibmaem,ipmi,none,rapl}.so
+%{_libdir}/%{name}/acct_gather_energy_{ibmaem,ipmi,none,rapl,xcc}.so
 %{_libdir}/%{name}/acct_gather_filesystem_{lustre,none}.so
 %{_libdir}/%{name}/acct_gather_interconnect_{none,ofed}.so
-%{_libdir}/%{name}/acct_gather_profile_{hdf5,none}.so
+%{_libdir}/%{name}/acct_gather_profile_{hdf5,influxdb,none}.so
 %{_libdir}/%{name}/auth_munge.so
 %{_libdir}/%{name}/burst_buffer_generic.so
 %{_libdir}/%{name}/checkpoint_{none,ompi}.so
@@ -722,6 +721,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Thu Jan 31 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.5-1
+- Release of 18.08.5
+
 * Thu Jan 31 2019 Philip Kovacs <pkdevel@yahoo.com> - 17.11.13-2
 - Fix build issue on 32-bit architectures
 

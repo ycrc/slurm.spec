@@ -1,8 +1,8 @@
 diff --git a/src/plugins/mpi/pmix/mpi_pmix.c b/src/plugins/mpi/pmix/mpi_pmix.c
-index 2d4c5d9dc9..dedb983f92 100644
+index 1a0998d213..c8241056bc 100644
 --- a/src/plugins/mpi/pmix/mpi_pmix.c
 +++ b/src/plugins/mpi/pmix/mpi_pmix.c
-@@ -79,8 +79,10 @@ const char plugin_name[] = "PMIx plugin";
+@@ -79,10 +79,13 @@ const char plugin_name[] = "PMIx plugin";
  
  #if (HAVE_PMIX_VER == 1)
  const char plugin_type[] = "mpi/pmix_v1";
@@ -10,10 +10,13 @@ index 2d4c5d9dc9..dedb983f92 100644
  #elif (HAVE_PMIX_VER == 2)
  const char plugin_type[] = "mpi/pmix_v2";
 +const char libpmix_soname[] = "libpmix.so.2";
+ #elif (HAVE_PMIX_VER == 3)
+ const char plugin_type[] = "mpi/pmix_v3";
++const char libpmix_soname[] = "libpmix.so.3";
  #endif
  
  const uint32_t plugin_version = SLURM_VERSION_NUMBER;
-@@ -103,7 +105,7 @@ static void *_libpmix_open(void)
+@@ -105,7 +108,7 @@ static void *_libpmix_open(void)
  #elif defined PMIXP_V2_LIBPATH
  	xstrfmtcat(full_path, "%s/", PMIXP_V2_LIBPATH);
  #endif

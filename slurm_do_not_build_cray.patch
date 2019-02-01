@@ -3,8 +3,8 @@ index 24ab9de7cc..087262c347 100644
 --- a/contribs/Makefile.am
 +++ b/contribs/Makefile.am
 @@ -1,4 +1,4 @@
--SUBDIRS = cray lua mic openlava pam pam_slurm_adopt perlapi pmi2 seff sgather sgi sjobexit torque
-+SUBDIRS = lua mic openlava pam pam_slurm_adopt perlapi pmi2 seff sgather sgi sjobexit torque
+-SUBDIRS = cray lua mic openlava pam pam_slurm_adopt perlapi pmi pmi2 seff sgather sgi sjobexit torque
++SUBDIRS = lua mic openlava pam pam_slurm_adopt perlapi pmi pmi2 seff sgather sgi sjobexit torque
  
  EXTRA_DIST = \
  	gcp			\

@@ -12,7 +12,7 @@
 
 Name:           slurm
 Version:        18.08.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -721,6 +721,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Sun Feb 17 2019 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 18.08.5-2
+- Rebuild for readline 8.0
+
 * Thu Jan 31 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.5-1
 - Release of 18.08.5
 

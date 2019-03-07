@@ -11,8 +11,8 @@
 %undefine _strict_symbol_defs_build
 
 Name:           slurm
-Version:        18.08.5
-Release:        2%{?dist}
+Version:        18.08.6
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -25,8 +25,6 @@ Source5:        slurm-setuser.in
 
 # Upstream bug #4449: release-style versioning of libslurmfull
 Patch0:         slurm_libslurmfull_version.patch
-# Upstream bug #6442 xhash_init signature change breaks xhash_test.c
-Patch1:         slurm_testsuite_xhash.patch
 
 # Build-related patches
 Patch10:        slurm_perlapi_rpaths.patch
@@ -192,7 +190,6 @@ Torque wrapper scripts used for helping migrate from Torque/PBS to Slurm.
 %prep
 %setup -q -n %{name_version}
 %patch0 -p1
-%patch1 -p1
 %patch10 -p1
 %patch11 -p1
 %patch12 -p1
@@ -721,6 +718,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Thu Mar 7 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.6-1
+- Release of 18.08.6
+
 * Sun Feb 17 2019 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 18.08.5-2
 - Rebuild for readline 8.0
 

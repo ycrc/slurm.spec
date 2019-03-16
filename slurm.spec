@@ -12,7 +12,7 @@
 
 Name:           slurm
 Version:        18.08.6
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -718,6 +718,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Sat Mar 16 2019 Orion Poplawski <orion@nwra.com> - 18.08.6-2
+- Rebuild for hdf5 1.10.5
+
 * Thu Mar 7 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.6-1
 - Release of 18.08.6
 

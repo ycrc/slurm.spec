@@ -718,7 +718,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
-* Thu Apr 12 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-1
+* Fri Apr 12 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-1
 - Release of 18.08.7
 
 * Sat Mar 16 2019 Orion Poplawski <orion@nwra.com> - 18.08.6-2

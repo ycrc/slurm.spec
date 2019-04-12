@@ -1,5 +1,5 @@
 # Upstream tarballs use an additional release number
-%global ups_rel 2
+%global ups_rel 1
 
 %if "%{ups_rel}" == "1"
 %global name_version %{name}-%{version}
@@ -11,8 +11,8 @@
 %undefine _strict_symbol_defs_build
 
 Name:           slurm
-Version:        18.08.6
-Release:        2%{?dist}
+Version:        18.08.7
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -718,6 +718,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Thu Apr 12 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-1
+- Release of 18.08.7
+
 * Sat Mar 16 2019 Orion Poplawski <orion@nwra.com> - 18.08.6-2
 - Rebuild for hdf5 1.10.5
 

@@ -1,10 +1,101 @@
 diff --git a/contribs/Makefile.am b/contribs/Makefile.am
-index 24ab9de7cc..087262c347 100644
+index da96aa070d..2a2d1f2c82 100644
 --- a/contribs/Makefile.am
 +++ b/contribs/Makefile.am
 @@ -1,4 +1,4 @@
--SUBDIRS = cray lua mic openlava pam pam_slurm_adopt perlapi pmi pmi2 seff sgather sgi sjobexit torque
-+SUBDIRS = lua mic openlava pam pam_slurm_adopt perlapi pmi pmi2 seff sgather sgi sjobexit torque
+-SUBDIRS = cray lua mic nss_slurm openlava pam pam_slurm_adopt perlapi pmi pmi2 seff sgather sgi sjobexit torque
++SUBDIRS = lua mic nss_slurm openlava pam pam_slurm_adopt perlapi pmi pmi2 seff sgather sgi sjobexit torque
  
  EXTRA_DIST = \
- 	gcp			\
+ 	make-3.81.slurm.patch	\
+diff --git a/src/plugins/acct_gather_energy/Makefile.am b/src/plugins/acct_gather_energy/Makefile.am
+index 50c4fd36a2..c826387219 100644
+--- a/src/plugins/acct_gather_energy/Makefile.am
++++ b/src/plugins/acct_gather_energy/Makefile.am
+@@ -1,3 +1,3 @@
+ # Makefile for accounting gather energy plugins
+ 
+-SUBDIRS = cray_aries rapl ibmaem ipmi none xcc
++SUBDIRS = rapl ibmaem ipmi none xcc
+diff --git a/src/plugins/core_spec/Makefile.am b/src/plugins/core_spec/Makefile.am
+index 44b1ed67c0..f06bc541d7 100644
+--- a/src/plugins/core_spec/Makefile.am
++++ b/src/plugins/core_spec/Makefile.am
+@@ -1,3 +1,3 @@
+ # Makefile for core specialization plugins
+ 
+-SUBDIRS = cray_aries none
++SUBDIRS = none
+diff --git a/src/plugins/job_container/Makefile.am b/src/plugins/job_container/Makefile.am
+index 8e1960a456..529a9d581d 100644
+--- a/src/plugins/job_container/Makefile.am
++++ b/src/plugins/job_container/Makefile.am
+@@ -1,3 +1,3 @@
+ # Makefile for job_container plugins
+ 
+-SUBDIRS = cncu none
++SUBDIRS = none
+diff --git a/src/plugins/job_submit/Makefile.am b/src/plugins/job_submit/Makefile.am
+index e393bcfb1c..b98cf2e000 100644
+--- a/src/plugins/job_submit/Makefile.am
++++ b/src/plugins/job_submit/Makefile.am
+@@ -2,7 +2,6 @@
+ 
+ SUBDIRS = \
+ 	all_partitions \
+-	cray_aries \
+ 	defaults \
+ 	logging \
+ 	lua \
+diff --git a/src/plugins/node_features/Makefile.am b/src/plugins/node_features/Makefile.am
+index f5ef036303..d955c51ba1 100644
+--- a/src/plugins/node_features/Makefile.am
++++ b/src/plugins/node_features/Makefile.am
+@@ -1,3 +1,3 @@
+ # Makefile for node_features plugins
+ 
+-SUBDIRS = knl_cray knl_generic
++SUBDIRS = knl_generic
+diff --git a/src/plugins/power/Makefile.am b/src/plugins/power/Makefile.am
+index ccde44c322..c6171740c1 100644
+--- a/src/plugins/power/Makefile.am
++++ b/src/plugins/power/Makefile.am
+@@ -1,3 +1,3 @@
+ # Makefile for power management plugins
+ 
+-SUBDIRS = common cray_aries none
++SUBDIRS = common none
+diff --git a/src/plugins/select/Makefile.am b/src/plugins/select/Makefile.am
+index 09fdfd2313..570af23c4a 100644
+--- a/src/plugins/select/Makefile.am
++++ b/src/plugins/select/Makefile.am
+@@ -1,7 +1,7 @@
+ # Makefile for node selection plugins
+ 
+ # NOTE: other must be in the list before cray_aries lest the build break
+-SUBDIRS = other cons_res cons_tres cray_aries linear
++SUBDIRS = other cons_res cons_tres linear
+ 
+ # Each plugin here needs a plugin_id, here are the currect plug_ids
+ # for each plugin.
+diff --git a/src/plugins/switch/Makefile.am b/src/plugins/switch/Makefile.am
+index ddfe019a65..39a2b3eb7f 100644
+--- a/src/plugins/switch/Makefile.am
++++ b/src/plugins/switch/Makefile.am
+@@ -1,3 +1,3 @@
+ # Makefile for switch plugins
+ 
+-SUBDIRS = cray_aries generic none
++SUBDIRS = generic none
+diff --git a/src/plugins/task/Makefile.am b/src/plugins/task/Makefile.am
+index 8d2a36eb68..607af1cb7c 100644
+--- a/src/plugins/task/Makefile.am
++++ b/src/plugins/task/Makefile.am
+@@ -1,6 +1,6 @@
+ # Makefile for task plugins
+ 
+-SUBDIRS = cray_aries none
++SUBDIRS = none
+ 
+ if HAVE_SCHED_SETAFFINITY
+ SUBDIRS += affinity

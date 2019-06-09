@@ -38,16 +38,6 @@ index 54909096b9..93433d6fa3 100755
  
  import re
  import sys
-diff --git a/testsuite/expect/driveregress.py b/testsuite/expect/driveregress.py
-index 8019615953..4e7eb7ca0f 100755
---- a/testsuite/expect/driveregress.py
-+++ b/testsuite/expect/driveregress.py
-@@ -1,4 +1,4 @@
--#!/usr/bin/env python
-+#!/usr/bin/env python3
- 
- ############################################################################
- # Copyright (C) 2011-2013 SchedMD LLC
 diff --git a/testsuite/expect/regression.py b/testsuite/expect/regression.py
 index 938aecc154..ea64c7cce0 100755
 --- a/testsuite/expect/regression.py

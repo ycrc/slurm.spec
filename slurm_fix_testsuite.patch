@@ -1,0 +1,579 @@
+commit 7fa8a69d8eda68ac1fa144de7686e47d18161037
+Author: Philip Kovacs <pkdevel@yahoo.com>
+Date:   Fri Jun 7 07:33:01 2019 -0600
+
+    patch for 19.05.0 testsuite `make check` errors
+    
+    bug 7197
+
+diff --git a/testsuite/slurm_unit/common/slurm_protocol_pack/pack_job_alloc_info_msg-test.c b/testsuite/slurm_unit/common/slurm_protocol_pack/pack_job_alloc_info_msg-test.c
+index 2f245622e7..ca95f636a8 100644
+--- a/testsuite/slurm_unit/common/slurm_protocol_pack/pack_job_alloc_info_msg-test.c
++++ b/testsuite/slurm_unit/common/slurm_protocol_pack/pack_job_alloc_info_msg-test.c
+@@ -59,7 +59,7 @@ START_TEST(pack_1702_req_null_ptrs)
+ 	unpack_req = (job_alloc_info_msg_t *)msg.data;
+ 	ck_assert_int_eq(rc, SLURM_SUCCESS);
+ 	ck_assert(unpack_req);
+-	ck_assert(!unpack_req->req_cluster); /* >= 17.11 */
++	//ck_assert(!unpack_req->req_cluster); /* >= 17.11 */
+ 	ck_assert_uint_eq(unpack_req->job_id, pack_req.job_id);
+ 
+ 	free_buf(buf);
+@@ -94,7 +94,7 @@ START_TEST(pack_1702_req)
+ 	unpack_req = (job_alloc_info_msg_t *)msg.data;
+ 	ck_assert_int_eq(rc, SLURM_SUCCESS);
+ 	ck_assert(unpack_req);
+-	ck_assert(!unpack_req->req_cluster); /* >= 17.11 */
++	//ck_assert(!unpack_req->req_cluster); /* >= 17.11 */
+ 	ck_assert_uint_eq(unpack_req->job_id, pack_req.job_id);
+ 
+ 	free_buf(buf);
+diff --git a/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c b/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c
+index dd10e1b857..d068fef66d 100644
+--- a/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c
++++ b/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c
+@@ -236,9 +236,9 @@ Suite* suite(void)
+ 	TCase* tc_core = tcase_create("Pack slurmdb_federation_rec_t");
+ 	tcase_add_test(tc_core, invalid_protocol);
+ 	tcase_add_test(tc_core, pack_1702_federation_rec);
+-	tcase_add_test(tc_core, pack_1702_null_federation_rec);
++	//tcase_add_test(tc_core, pack_1702_null_federation_rec);
+ 	tcase_add_test(tc_core, pack_1702_federation_rec_empty_list);
+-	tcase_add_test(tc_core, pack_1702_federation_rec_fail);
++	//tcase_add_test(tc_core, pack_1702_federation_rec_fail);
+ 
+ 	tcase_add_test(tc_core, pack_1711_federation_rec);
+ 	tcase_add_test(tc_core, pack_1711_null_federation_rec);
+diff --git a/testsuite/slurm_unit/common/xhash-test.c b/testsuite/slurm_unit/common/xhash-test.c
+index 46616aef2b..2fc4d1d373 100644
+--- a/testsuite/slurm_unit/common/xhash-test.c
++++ b/testsuite/slurm_unit/common/xhash-test.c
+@@ -49,12 +49,11 @@ typedef struct hashable_st {
+ 	uint32_t idn;
+ } hashable_t;
+ 
+-const char* hashable_identify(void* voiditem)
++void hashable_identify(void* voiditem, const char** key, uint32_t* key_len)
+ {
+ 	hashable_t* item = (hashable_t*)voiditem;
+-	if (!item->id[0]) snprintf(item->id, 255, "%lu",
+-			(unsigned long)item->idn);
+-	return item->id;
++	*key = item->id;
++	*key_len = strlen(item->id);
+ }
+ 
+ /*****************************************************************************
+@@ -71,7 +70,7 @@ static void setup(void)
+ 	g_ht = xhash_init(hashable_identify, NULL);
+ 	if (!g_ht) return; /* fatal error, will be detected by test cases */
+ 	for (i = 0; i < g_hashableslen; ++i) {
+-		g_hashables[i].id[0] = 0;
++		snprintf(g_hashables[i].id, sizeof(g_hashables[i].id), "%d", i);
+ 		g_hashables[i].idn = i;
+ 		/* it is an error if xhash_add returns null but it will be
+ 		 * detected by test cases */
+@@ -120,7 +119,7 @@ START_TEST(test_add)
+ 	fail_unless(xhash_add(ht, a+3) != NULL, "xhash_add failed");
+ 	for (i = 0; i < len; ++i) {
+ 		snprintf(buffer, sizeof(buffer), "%d", i);
+-		fail_unless(xhash_get(ht, buffer) == (a + i),
++		fail_unless(xhash_get_str(ht, buffer) == (a + i),
+ 				"bad hashable item returned");
+ 	}
+ 	xhash_free(ht);
+@@ -134,14 +133,14 @@ START_TEST(test_find)
+ 	int i;
+ 
+ 	/* test bad match */
+-	fail_unless(xhash_get(ht, "bad") == NULL  , "invalid case not null");
+-	fail_unless(xhash_get(ht, "-1") == NULL   , "invalid case not null");
+-	fail_unless(xhash_get(ht, "10000") == NULL, "invalid case not null");
++	fail_unless(xhash_get_str(ht, "bad") == NULL  , "invalid case not null");
++	fail_unless(xhash_get_str(ht, "-1") == NULL   , "invalid case not null");
++	fail_unless(xhash_get_str(ht, "10000") == NULL, "invalid case not null");
+ 
+ 	/* test all good indexes */
+ 	for (i = 0; i < g_hashableslen; ++i) {
+ 		snprintf(buffer, sizeof(buffer), "%d", i);
+-		fail_unless(xhash_get(ht, buffer) == (g_hashables + i),
++		fail_unless(xhash_get_str(ht, buffer) == (g_hashables + i),
+ 				"bad hashable item returned");
+ 	}
+ }
+@@ -156,7 +155,7 @@ static int test_delete_helper()
+ 	char buffer[255];
+ 	for (i = 0; i < g_hashableslen; ++i) {
+ 		snprintf(buffer, sizeof(buffer), "%d", i);
+-		if (xhash_get(ht, buffer) != (g_hashables + i)) {
++		if (xhash_get_str(ht, buffer) != (g_hashables + i)) {
+ 			++ret;
+ 		}
+ 	}
+@@ -170,10 +169,10 @@ START_TEST(test_delete)
+ 	char buffer[255];
+ 
+ 	/* invalid cases */
+-	xhash_delete(NULL, "1");
+-	fail_unless(xhash_get(ht, "1") != NULL, "invalid case null");
++	xhash_delete_str(NULL, "1");
++	fail_unless(xhash_get_str(ht, "1") != NULL, "invalid case null");
+ 	/* Deleting non-existent item should do nothing. */
+-	xhash_delete(ht, NULL);
++	xhash_delete(ht, NULL, 0);
+ 	fail_unless(xhash_count(ht) == g_hashableslen,
+ 			"invalid delete has been done");
+ 	result = test_delete_helper();
+@@ -182,17 +181,17 @@ START_TEST(test_delete)
+ 			result);
+ 
+ 	/* test correct deletion */
+-	xhash_delete(ht, "10");
+-	fail_unless(xhash_get(ht, "10") == NULL, "item not deleted");
++	xhash_delete_str(ht, "10");
++	fail_unless(xhash_get_str(ht, "10") == NULL, "item not deleted");
+ 	fail_unless(xhash_count(ht) == (g_hashableslen-1), "bad count");
+ 	/* left edge */
+-	xhash_delete(ht, "0");
+-	fail_unless(xhash_get(ht, "0") == NULL, "item not deleted");
++	xhash_delete_str(ht, "0");
++	fail_unless(xhash_get_str(ht, "0") == NULL, "item not deleted");
+ 	fail_unless(xhash_count(ht) == (g_hashableslen-2), "bad count");
+ 	/* right edge */
+ 	snprintf(buffer, sizeof(buffer), "%u", (g_hashableslen-2));
+-	xhash_delete(ht, buffer);
+-	fail_unless(xhash_get(ht, "0") == NULL, "item not deleted");
++	xhash_delete_str(ht, buffer);
++	fail_unless(xhash_get_str(ht, "0") == NULL, "item not deleted");
+ 	fail_unless(xhash_count(ht) == (g_hashableslen-3), "bad count");
+ 
+ 	result = test_delete_helper();
+commit b0db3f0fbfdfc9a7820f24c4b30adee696dc863a
+Author: Morris Jette <jette@schedmd.com>
+Date:   Fri Jun 7 07:57:26 2019 -0600
+
+    Modify "make check" to validate v1808 un/pack logic
+    
+    bug 7197
+
+diff --git a/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c b/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c
+index d068fef66d..bbeeefc4a7 100644
+--- a/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c
++++ b/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c
+@@ -32,29 +32,26 @@ START_TEST(invalid_protocol)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1702_null_federation_rec)
++START_TEST(pack_1711_null_federation_rec)
+ {
+ 	int rc;
+ 	Buf buf = init_buf(1024);
+-	slurmdb_federation_rec_t pack_fr = {0};
+ 
+ 	slurmdb_pack_federation_rec(NULL, SLURM_MIN_PROTOCOL_VERSION, buf);
+ 
+ 	set_buf_offset(buf, 0);
+ 
+-	slurmdb_federation_rec_t *unpack_fr;
++	slurmdb_federation_rec_t *unpack_fr = NULL;
+ 	rc = slurmdb_unpack_federation_rec((void **)&unpack_fr, SLURM_MIN_PROTOCOL_VERSION, buf);
+-	ck_assert(rc                   == SLURM_SUCCESS);
+-	ck_assert(pack_fr.name         == unpack_fr->name);
+-	ck_assert(pack_fr.flags        == unpack_fr->flags);
+-	ck_assert(pack_fr.cluster_list == unpack_fr->cluster_list);
++	ck_assert(rc        == SLURM_SUCCESS);
++	ck_assert(unpack_fr == NULL);
+ 
+ 	free_buf(buf);
+ 	slurmdb_destroy_federation_rec(unpack_fr);
+ }
+ END_TEST
+ 
+-START_TEST(pack_1702_federation_rec)
++START_TEST(pack_1711_federation_rec)
+ {
+ 	int rc;
+ 
+@@ -90,7 +87,7 @@ START_TEST(pack_1702_federation_rec)
+ END_TEST
+ 
+ 
+-START_TEST(pack_1702_federation_rec_empty_list)
++START_TEST(pack_1711_federation_rec_empty_list)
+ {
+ 	int rc;
+ 
+@@ -118,31 +115,7 @@ START_TEST(pack_1702_federation_rec_empty_list)
+ END_TEST
+ 
+ 
+-/* This test sets up the buffer so that it fails when unpacking the cluster rec.
+- */
+-START_TEST(pack_1702_federation_rec_fail)
+-{
+-	int rc;
+-	char *name = xstrdup("Saint Augustine");
+-	Buf buf = init_buf(18*sizeof(uint32_t));
+-	packstr(name, buf);
+-	pack32(7, buf);
+-	pack32(1, buf);
+-
+-	set_buf_offset(buf, 0);
+-
+-	slurmdb_federation_rec_t *unpack_fr;
+-	rc = slurmdb_unpack_federation_rec((void **)&unpack_fr, SLURM_MIN_PROTOCOL_VERSION, buf);
+-	ck_assert_int_eq(rc, SLURM_ERROR);
+-
+-	free_buf(buf);
+-	xfree(name);
+-}
+-END_TEST
+-
+-
+-/* 17.11 */
+-START_TEST(pack_1711_null_federation_rec)
++START_TEST(pack_1808_null_federation_rec)
+ {
+ 	int rc;
+ 	Buf buf = init_buf(1024);
+@@ -161,7 +134,7 @@ START_TEST(pack_1711_null_federation_rec)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1711_federation_rec)
++START_TEST(pack_1808_federation_rec)
+ {
+ 	int rc;
+ 
+@@ -197,7 +170,7 @@ START_TEST(pack_1711_federation_rec)
+ END_TEST
+ 
+ 
+-START_TEST(pack_1711_federation_rec_empty_list)
++START_TEST(pack_1808_federation_rec_empty_list)
+ {
+ 	int rc;
+ 
+@@ -235,15 +208,14 @@ Suite* suite(void)
+ 	Suite* s = suite_create("Pack slurmdb_federation_rec_t");
+ 	TCase* tc_core = tcase_create("Pack slurmdb_federation_rec_t");
+ 	tcase_add_test(tc_core, invalid_protocol);
+-	tcase_add_test(tc_core, pack_1702_federation_rec);
+-	//tcase_add_test(tc_core, pack_1702_null_federation_rec);
+-	tcase_add_test(tc_core, pack_1702_federation_rec_empty_list);
+-	//tcase_add_test(tc_core, pack_1702_federation_rec_fail);
+-
+ 	tcase_add_test(tc_core, pack_1711_federation_rec);
+ 	tcase_add_test(tc_core, pack_1711_null_federation_rec);
+ 	tcase_add_test(tc_core, pack_1711_federation_rec_empty_list);
+ 
++	tcase_add_test(tc_core, pack_1808_federation_rec);
++	tcase_add_test(tc_core, pack_1808_null_federation_rec);
++	tcase_add_test(tc_core, pack_1808_federation_rec_empty_list);
++
+ 	suite_add_tcase(s, tc_core);
+ 	return s;
+ }
+commit 8aade6d1a3b25ee43b466f7c5624f5199b7bf0ec
+Author: Morris Jette <jette@schedmd.com>
+Date:   Fri Jun 7 08:14:50 2019 -0600
+
+    Rename some "make check" functions names to be generic
+    
+    bug 7197
+
+diff --git a/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c b/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c
+index bbeeefc4a7..6a48164027 100644
+--- a/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c
++++ b/testsuite/slurm_unit/common/slurmdb_pack/pack_federation_rec-test.c
+@@ -32,7 +32,7 @@ START_TEST(invalid_protocol)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1711_null_federation_rec)
++START_TEST(pack_back2_null_federation_rec)
+ {
+ 	int rc;
+ 	Buf buf = init_buf(1024);
+@@ -51,7 +51,7 @@ START_TEST(pack_1711_null_federation_rec)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1711_federation_rec)
++START_TEST(pack_back2_federation_rec)
+ {
+ 	int rc;
+ 
+@@ -87,7 +87,7 @@ START_TEST(pack_1711_federation_rec)
+ END_TEST
+ 
+ 
+-START_TEST(pack_1711_federation_rec_empty_list)
++START_TEST(pack_back2_federation_rec_empty_list)
+ {
+ 	int rc;
+ 
+@@ -115,7 +115,7 @@ START_TEST(pack_1711_federation_rec_empty_list)
+ END_TEST
+ 
+ 
+-START_TEST(pack_1808_null_federation_rec)
++START_TEST(pack_back1_null_federation_rec)
+ {
+ 	int rc;
+ 	Buf buf = init_buf(1024);
+@@ -134,7 +134,7 @@ START_TEST(pack_1808_null_federation_rec)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1808_federation_rec)
++START_TEST(pack_back1_federation_rec)
+ {
+ 	int rc;
+ 
+@@ -170,7 +170,7 @@ START_TEST(pack_1808_federation_rec)
+ END_TEST
+ 
+ 
+-START_TEST(pack_1808_federation_rec_empty_list)
++START_TEST(pack_back1_federation_rec_empty_list)
+ {
+ 	int rc;
+ 
+@@ -208,13 +208,13 @@ Suite* suite(void)
+ 	Suite* s = suite_create("Pack slurmdb_federation_rec_t");
+ 	TCase* tc_core = tcase_create("Pack slurmdb_federation_rec_t");
+ 	tcase_add_test(tc_core, invalid_protocol);
+-	tcase_add_test(tc_core, pack_1711_federation_rec);
+-	tcase_add_test(tc_core, pack_1711_null_federation_rec);
+-	tcase_add_test(tc_core, pack_1711_federation_rec_empty_list);
++	tcase_add_test(tc_core, pack_back2_federation_rec);
++	tcase_add_test(tc_core, pack_back2_null_federation_rec);
++	tcase_add_test(tc_core, pack_back2_federation_rec_empty_list);
+ 
+-	tcase_add_test(tc_core, pack_1808_federation_rec);
+-	tcase_add_test(tc_core, pack_1808_null_federation_rec);
+-	tcase_add_test(tc_core, pack_1808_federation_rec_empty_list);
++	tcase_add_test(tc_core, pack_back1_federation_rec);
++	tcase_add_test(tc_core, pack_back1_null_federation_rec);
++	tcase_add_test(tc_core, pack_back1_federation_rec_empty_list);
+ 
+ 	suite_add_tcase(s, tc_core);
+ 	return s;
+commit 549b1a3e6a8f6a677228209a2520595ffb42f98c
+Author: Morris Jette <jette@schedmd.com>
+Date:   Fri Jun 7 09:50:14 2019 -0600
+
+    Make check tests made more generic
+
+diff --git a/testsuite/slurm_unit/common/slurm_protocol_pack/pack_job_alloc_info_msg-test.c b/testsuite/slurm_unit/common/slurm_protocol_pack/pack_job_alloc_info_msg-test.c
+index ca95f636a8..85adb59ed1 100644
+--- a/testsuite/slurm_unit/common/slurm_protocol_pack/pack_job_alloc_info_msg-test.c
++++ b/testsuite/slurm_unit/common/slurm_protocol_pack/pack_job_alloc_info_msg-test.c
+@@ -33,7 +33,7 @@ START_TEST(pack_null_req)
+ END_TEST
+ #endif
+ 
+-START_TEST(pack_1702_req_null_ptrs)
++START_TEST(pack_back2_req_null_ptrs)
+ {
+ 	int rc;
+ 	Buf buf = init_buf(1024);
+@@ -59,7 +59,7 @@ START_TEST(pack_1702_req_null_ptrs)
+ 	unpack_req = (job_alloc_info_msg_t *)msg.data;
+ 	ck_assert_int_eq(rc, SLURM_SUCCESS);
+ 	ck_assert(unpack_req);
+-	//ck_assert(!unpack_req->req_cluster); /* >= 17.11 */
++	ck_assert(!unpack_req->req_cluster);
+ 	ck_assert_uint_eq(unpack_req->job_id, pack_req.job_id);
+ 
+ 	free_buf(buf);
+@@ -67,7 +67,7 @@ START_TEST(pack_1702_req_null_ptrs)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1702_req)
++START_TEST(pack_back2_req)
+ {
+ 	int rc;
+ 	Buf buf = init_buf(1024);
+@@ -103,7 +103,7 @@ START_TEST(pack_1702_req)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1711_req_null_ptrs)
++START_TEST(pack_back1_req_null_ptrs)
+ {
+ 	int rc;
+ 	Buf buf = init_buf(1024);
+@@ -136,7 +136,7 @@ START_TEST(pack_1711_req_null_ptrs)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1711_req)
++START_TEST(pack_back1_req)
+ {
+ 	int rc;
+ 	Buf buf = init_buf(1024);
+@@ -188,10 +188,10 @@ Suite* suite(SRunner *sr)
+        if (srunner_fork_status(sr) != CK_NOFORK)
+                tcase_add_test_raise_signal(tc_core, pack_null_req, SIGABRT);
+ #endif
+-	tcase_add_test(tc_core, pack_1702_req_null_ptrs);
+-	tcase_add_test(tc_core, pack_1702_req);
+-	tcase_add_test(tc_core, pack_1711_req_null_ptrs);
+-	tcase_add_test(tc_core, pack_1711_req);
++	tcase_add_test(tc_core, pack_back2_req_null_ptrs);
++	tcase_add_test(tc_core, pack_back2_req);
++	tcase_add_test(tc_core, pack_back1_req_null_ptrs);
++	tcase_add_test(tc_core, pack_back1_req);
+ 	suite_add_tcase(s, tc_core);
+ 	return s;
+ }
+diff --git a/testsuite/slurm_unit/common/slurmdb_pack/pack_cluster_rec-test.c b/testsuite/slurm_unit/common/slurmdb_pack/pack_cluster_rec-test.c
+index c58149b48f..b2c6042888 100644
+--- a/testsuite/slurm_unit/common/slurmdb_pack/pack_cluster_rec-test.c
++++ b/testsuite/slurm_unit/common/slurmdb_pack/pack_cluster_rec-test.c
+@@ -20,7 +20,7 @@ START_TEST(invalid_protocol)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1702_null_rec)
++START_TEST(pack_back2_null_rec)
+ {
+ 	int rc;
+ 	slurmdb_cluster_rec_t pack_rec;
+@@ -64,7 +64,7 @@ START_TEST(pack_1702_null_rec)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1702_rec)
++START_TEST(pack_back2_rec)
+ {
+ 	int rc;
+ 	Buf buf = init_buf(1024);
+@@ -85,6 +85,9 @@ START_TEST(pack_1702_rec)
+ 	pack_rec.name             = xstrdup("name");
+ 	pack_rec.nodes            = xstrdup("nodes");
+ 	pack_rec.plugin_id_select = 8;
++	pack_rec.fed.feature_list = list_create(slurm_destroy_char);
++	slurm_addto_mode_char_list(pack_rec.fed.feature_list, "a,b,c", 0);
++	ck_assert_int_eq(list_count(pack_rec.fed.feature_list), 3);
+ 
+ 	/* will be tested separately. */
+ 	pack_rec.root_assoc       = NULL;
+@@ -126,9 +129,14 @@ START_TEST(pack_1702_rec)
+ 	ck_assert_str_eq(pack_rec.name, unpack_rec->name);
+ 	ck_assert_str_eq(pack_rec.nodes, unpack_rec->nodes);
+ 
+-	/* 17.11 */
+-	ck_assert(pack_rec.fed.feature_list == unpack_rec->fed.feature_list);
+-
++	char *feature;
++	ck_assert_int_eq(list_count(pack_rec.fed.feature_list), list_count(unpack_rec->fed.feature_list));
++	ListIterator itr = list_iterator_create(pack_rec.fed.feature_list);
++	while ((feature = list_next(itr))) {
++		if (!list_find_first(unpack_rec->fed.feature_list, slurm_find_char_in_list, feature))
++			ck_abort_msg("Didn't find feature %s in unpacked list",
++				     feature);
++	}
+ 
+ 	FREE_NULL_LIST(pack_rec.accounting_list);
+ 	xfree(pack_rec.control_host);
+@@ -140,7 +148,7 @@ START_TEST(pack_1702_rec)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1702_rec_null_ptrs)
++START_TEST(pack_back2_rec_null_ptrs)
+ {
+ 	Buf buf = init_buf(1024);
+ 	slurmdb_cluster_rec_t pack_rec = {0};
+@@ -185,7 +193,6 @@ START_TEST(pack_1702_rec_null_ptrs)
+ 	ck_assert(pack_rec.rpc_version      == unpack_rec->rpc_version);
+ 	ck_assert(pack_rec.fed.recv         == unpack_rec->fed.recv);
+ 	ck_assert(pack_rec.fed.send         == unpack_rec->fed.send);
+-	/* 17.11 */
+ 	ck_assert(pack_rec.fed.feature_list == unpack_rec->fed.feature_list);
+ 
+ 	free_buf(buf);
+@@ -193,7 +200,7 @@ START_TEST(pack_1702_rec_null_ptrs)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1711_null_rec)
++START_TEST(pack_back1_null_rec)
+ {
+ 	int rc;
+ 	slurmdb_cluster_rec_t pack_rec;
+@@ -204,7 +211,6 @@ START_TEST(pack_1711_null_rec)
+ 	pack_rec.fed.state        = 0;
+ 	pack_rec.dimensions       = 1;
+ 	pack_rec.plugin_id_select = NO_VAL;
+-
+ 	slurmdb_pack_cluster_rec(NULL, SLURM_ONE_BACK_PROTOCOL_VERSION, buf);
+ 
+ 	set_buf_offset(buf, 0);
+@@ -218,7 +224,6 @@ START_TEST(pack_1711_null_rec)
+ 	ck_assert(pack_rec.nodes           == unpack_rec->nodes);
+ 	ck_assert(pack_rec.fed.recv        == unpack_rec->fed.recv);
+ 	ck_assert(pack_rec.fed.send        == unpack_rec->fed.send);
+-	/* 17.11 */
+ 	ck_assert(pack_rec.fed.feature_list == unpack_rec->fed.feature_list);
+ 
+ 	/* root_assoc gets unpacked into a empty structure */
+@@ -237,7 +242,7 @@ START_TEST(pack_1711_null_rec)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1711_rec)
++START_TEST(pack_back1_rec)
+ {
+ 	int rc;
+ 	Buf buf = init_buf(1024);
+@@ -302,7 +307,6 @@ START_TEST(pack_1711_rec)
+ 	ck_assert_str_eq(pack_rec.name, unpack_rec->name);
+ 	ck_assert_str_eq(pack_rec.nodes, unpack_rec->nodes);
+ 
+-	/* 17.11 */
+ 	char *feature;
+ 	ck_assert_int_eq(list_count(pack_rec.fed.feature_list), list_count(unpack_rec->fed.feature_list));
+ 	ListIterator itr = list_iterator_create(pack_rec.fed.feature_list);
+@@ -322,7 +326,7 @@ START_TEST(pack_1711_rec)
+ }
+ END_TEST
+ 
+-START_TEST(pack_1711_rec_null_ptrs)
++START_TEST(pack_back1_rec_null_ptrs)
+ {
+ 	Buf buf = init_buf(1024);
+ 	slurmdb_cluster_rec_t pack_rec = {0};
+@@ -367,7 +371,6 @@ START_TEST(pack_1711_rec_null_ptrs)
+ 	ck_assert(pack_rec.rpc_version      == unpack_rec->rpc_version);
+ 	ck_assert(pack_rec.fed.recv         == unpack_rec->fed.recv);
+ 	ck_assert(pack_rec.fed.send         == unpack_rec->fed.send);
+-	/* 17.11 */
+ 	ck_assert(pack_rec.fed.feature_list == unpack_rec->fed.feature_list);
+ 
+ 	free_buf(buf);
+@@ -385,13 +388,13 @@ Suite* suite(void)
+ 	TCase* tc_core = tcase_create("Pack slurmdb_cluster_rec_t");
+ 	tcase_add_test(tc_core, invalid_protocol);
+ 
+-	tcase_add_test(tc_core, pack_1711_null_rec);
+-	tcase_add_test(tc_core, pack_1711_rec);
+-	tcase_add_test(tc_core, pack_1711_rec_null_ptrs);
++	tcase_add_test(tc_core, pack_back1_null_rec);
++	tcase_add_test(tc_core, pack_back1_rec);
++	tcase_add_test(tc_core, pack_back1_rec_null_ptrs);
+ 
+-	tcase_add_test(tc_core, pack_1702_null_rec);
+-	tcase_add_test(tc_core, pack_1702_rec);
+-	tcase_add_test(tc_core, pack_1702_rec_null_ptrs);
++	tcase_add_test(tc_core, pack_back2_null_rec);
++	tcase_add_test(tc_core, pack_back2_rec);
++	tcase_add_test(tc_core, pack_back2_rec_null_ptrs);
+ 
+ 	suite_add_tcase(s, tc_core);
+ 	return s;

@@ -12,7 +12,7 @@
 
 Name:           slurm
 Version:        19.05.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -75,6 +75,10 @@ BuildRequires:  readline-devel
 BuildRequires:  rdma-core-devel
 BuildRequires:  numactl-devel
 %endif
+
+# exclude upstream-deprecated 32-bit architectures
+ExcludeArch:    armv7hl
+ExcludeArch:    i686
 
 Requires:       munge
 Requires:       pmix >= 2.0.0
@@ -726,6 +730,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Sun Jun 9 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-2
+- Exclude upstream-deprecated 32-bit architectures
+
 * Sun Jun 9 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-1
 - Release of 19.05.0
 - Added nss_plugin subpackage for optional nss plugin

@@ -47,6 +47,7 @@ BuildRequires:  gcc
 BuildRequires:  perl-devel
 BuildRequires:  perl-ExtUtils-MakeMaker
 BuildRequires:  perl-interpreter
+BuildRequires:  perl-macros
 BuildRequires:  perl-podlators
 BuildRequires:  pkgconf
 BuildRequires:  pkgconfig(check)

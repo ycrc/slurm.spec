@@ -264,16 +264,16 @@ s|^dir_tmpfiles_d=.*|dir_tmpfiles_d="%{_tmpfilesdir}"|g;' \
 
 # build contribs packages
 # INSTALLDIRS=vendor so perlapi goes to vendor_perl directory
-PERL_MM_PARAMS="INSTALLDIRS=vendor" %make_build contrib V=1
+%make_build PERL_MM_PARAMS="INSTALLDIRS=vendor" contrib V=1
 
 %check
 # The test binaries need LD_LIBRARY_PATH to find the compiled slurm library
 # in the build tree.
-LD_LIBRARY_PATH="%{buildroot}%{_libdir};%{_libdir}" %{__make} check
+%make_build LD_LIBRARY_PATH="%{buildroot}%{_libdir};%{_libdir}" check
 
 %install
 %make_install
-%{__make} install-contrib DESTDIR=%{buildroot}
+%make_build DESTDIR=%{buildroot} install-contrib
 
 install -d -m 0755 %{buildroot}%{_sysconfdir}/%{name}
 install -d -m 0755 %{buildroot}%{_sysconfdir}/%{name}/layouts.d

@@ -12,7 +12,7 @@
 
 Name:           slurm
 Version:        19.05.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -225,9 +225,9 @@ mkdir -p extras
 cp %SOURCE5 extras/%{name}-setuser.in
 
 %build
-%{__aclocal} -I auxdir
-%{__autoconf}
-%{__automake} --no-force
+aclocal -I auxdir
+autoconf
+automake --no-force
 # use -z lazy to allow dlopen with unresolved symbols
 %configure \
   LDFLAGS="$LDFLAGS -Wl,-z,lazy" \
@@ -731,6 +731,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Wed Jun 19 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-3
+- Stop using autotools macros that were removed from rpm
+
 * Sun Jun 9 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-2
 - Exclude upstream-deprecated 32-bit architectures
 

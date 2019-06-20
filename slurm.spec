@@ -12,7 +12,7 @@
 
 Name:           slurm
 Version:        18.08.7
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -209,16 +209,15 @@ mkdir -p extras
 cp %SOURCE5 extras/%{name}-setuser.in
 
 %build
-%{__aclocal} -I auxdir
-%{__autoconf}
-%{__automake} --no-force
+aclocal -I auxdir
+autoconf
+automake --no-force
 # use -z lazy to allow dlopen with unresolved symbols
 %configure \
   LDFLAGS="$LDFLAGS -Wl,-z,lazy" \
   --prefix=%{_prefix} \
   --sysconfdir=%{_sysconfdir}/%{name} \
   --with-pam_dir=%{_libdir}/security \
-  --with-pmix \
   --enable-shared \
   --enable-x11 \
   --disable-static \
@@ -248,16 +247,16 @@ s|^dir_tmpfiles_d=.*|dir_tmpfiles_d="%{_tmpfilesdir}"|g;' \
 
 # build contribs packages
 # INSTALLDIRS=vendor so perlapi goes to vendor_perl directory
-PERL_MM_PARAMS="INSTALLDIRS=vendor" %make_build contrib V=1
+%make_build PERL_MM_PARAMS="INSTALLDIRS=vendor" contrib V=1
 
 %check
 # The test binaries need LD_LIBRARY_PATH to find the compiled slurm library
 # in the build tree.
-LD_LIBRARY_PATH="%{buildroot}%{_libdir};%{_libdir}" %{__make} check
+%make_build LD_LIBRARY_PATH="%{buildroot}%{_libdir};%{_libdir}" check
 
 %install
 %make_install
-%{__make} install-contrib DESTDIR=%{buildroot}
+%make_build DESTDIR=%{buildroot} install-contrib
 
 install -d -m 0755 %{buildroot}%{_sysconfdir}/%{name}
 install -d -m 0755 %{buildroot}%{_sysconfdir}/%{name}/layouts.d
@@ -718,6 +717,12 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Wed Jun 19 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-2
+- Correct the configure for pmix
+- Correct the slurm_pmix_soname patch
+- Use make_build macro instead of make
+- Use autotools commands instead of rpm macros
+
 * Fri Apr 12 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-1
 - Release of 18.08.7
 

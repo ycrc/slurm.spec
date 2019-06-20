@@ -12,7 +12,7 @@
 
 Name:           slurm
 Version:        19.05.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -234,7 +234,6 @@ automake --no-force
   --prefix=%{_prefix} \
   --sysconfdir=%{_sysconfdir}/%{name} \
   --with-pam_dir=%{_libdir}/security \
-  --with-pmix \
   --enable-shared \
   --enable-x11 \
   --disable-static \
@@ -731,6 +730,10 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Wed Jun 19 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-4
+- Correct the configure for pmix
+- Correct the slurm_pmix_soname patch
+
 * Wed Jun 19 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-3
 - Stop using autotools macros that were removed from rpm
 

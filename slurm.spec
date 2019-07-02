@@ -12,7 +12,7 @@
 
 Name:           slurm
 Version:        18.08.7
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -39,7 +39,6 @@ Patch22:        slurm_to_python3.patch
 
 BuildRequires:  autoconf
 BuildRequires:  automake
-BuildRequires:  environment(modules)
 BuildRequires:  desktop-file-utils
 BuildRequires:  gcc
 BuildRequires:  perl-devel
@@ -111,8 +110,6 @@ and their respective man pages.
 
 %package libs
 Summary: Slurm shared libraries
-Provides: pmi
-Requires: environment(modules)
 %description libs
 Slurm shared libraries.
 
@@ -243,11 +240,11 @@ s|^dir_tmpfiles_d=.*|dir_tmpfiles_d="%{_tmpfilesdir}"|g;' \
     extras/%{name}-setuser.in > extras/%{name}-setuser
 
 # build base packages
-%make_build V=1
+%make_build
 
 # build contribs packages
 # INSTALLDIRS=vendor so perlapi goes to vendor_perl directory
-%make_build PERL_MM_PARAMS="INSTALLDIRS=vendor" contrib V=1
+%make_build PERL_MM_PARAMS="INSTALLDIRS=vendor" contrib
 
 %check
 # The test binaries need LD_LIBRARY_PATH to find the compiled slurm library
@@ -305,18 +302,6 @@ touch %{buildroot}%{_rundir}/%{name}/slurmctld.pid
 touch %{buildroot}%{_rundir}/%{name}/slurmd.pid
 touch %{buildroot}%{_rundir}/%{name}/slurmdbd.pid
 
-# install pmi/slurm environment module file
-install -d -m 0755 %{buildroot}%{_modulesdir}/pmi
-cat >%{buildroot}%{_modulesdir}/pmi/%{name}-%{_arch} <<EOF
-#%%Module 1.0
-#
-#  pmi/slurm module for use with 'environment-modules' package:
-#
-conflict         pmi
-prepend-path     LD_LIBRARY_PATH    %{_libdir}/%{name}/lib
-prepend-path     PKG_CONFIG_PATH    %{_libdir}/%{name}/lib/pkgconfig
-EOF
-
 # install pkgconfig file slurm.pc
 install -d -m 0755 %{buildroot}%{_libdir}/pkgconfig
 cat >%{buildroot}%{_libdir}/pkgconfig/%{name}.pc <<EOF
@@ -328,32 +313,6 @@ Version: %{version}
 Description: Slurm development library
 Cflags: -I\${includedir}
 Libs: -L\${libdir} -lslurm
-EOF
-
-# install pkgconfig file pmi.pc for environment module usage
-install -d -m 0755 %{buildroot}%{_libdir}/%{name}/lib/pkgconfig
-cat >%{buildroot}%{_libdir}/%{name}/lib/pkgconfig/pmi.pc <<EOF
-includedir=%{_includedir}/%{name}
-libdir=%{_libdir}/%{name}/lib
-
-Name: pmi
-Version: %{version}
-Description: Slurm PMI development library
-Cflags: -I\${includedir}
-Libs: -L\${libdir} -lpmi
-EOF
-
-# install pkgconfig file pmi2.pc for environment module usage
-install -d -m 0755 %{buildroot}%{_libdir}/%{name}/lib/pkgconfig
-cat >%{buildroot}%{_libdir}/%{name}/lib/pkgconfig/pmi2.pc <<EOF
-includedir=%{_includedir}/%{name}
-libdir=%{_libdir}/%{name}/lib
-
-Name: pmi2
-Version: %{version}
-Description: Slurm PMI2 development library
-Cflags: -I\${includedir}
-Libs: -L\${libdir} -lpmi2
 EOF
 
 # install desktop file for sview GTK+ program
@@ -369,11 +328,6 @@ install -m 0644 share/icons/hicolor/128x128/apps/%{name}.png \
 # install the extras/slurm-setuser script
 install -m 0755 extras/%{name}-setuser \
     %{buildroot}%{_bindir}/%{name}-setuser
-
-# move libpmi/libpmi2 to pmi/slurm environment module location
-install -d -m 0755 %{buildroot}%{_libdir}/%{name}/lib
-mv %{buildroot}%{_libdir}/libpmi.so* %{buildroot}%{_libdir}/%{name}/lib
-mv %{buildroot}%{_libdir}/libpmi2.so* %{buildroot}%{_libdir}/%{name}/lib
 
 install -m 0755 contribs/sjstat %{buildroot}%{_bindir}/sjstat
 
@@ -396,6 +350,10 @@ install -m 0644 contribs/lua/proctrack.lua %{buildroot}%{_docdir}/%{name}/contri
 
 # remove libtool archives
 find %{buildroot} -name \*.a -o -name \*.la | xargs rm -f
+# remove pmi/pmi2 headers which are provided by pmix dependency
+rm -rf %{buildroot}%{_includedir}/%{name}/pmi*.h
+# remove libpmi/pmi2 libraries which are provided by pmix dependency
+rm -rf %{buildroot}%{_libdir}/libpmi*.so*
 # remove libslurmfull symlink (non-development, internal library)
 rm -rf %{buildroot}%{_libdir}/libslurmfull.so
 # remove auth_none plugin
@@ -509,11 +467,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 
 %files devel
 %dir %{_includedir}/%{name}
-%dir %{_libdir}/%{name}/lib/pkgconfig
 %dir %{_libdir}/%{name}/src
 %dir %{_libdir}/%{name}/src/sattach
 %dir %{_libdir}/%{name}/src/srun
-%{_includedir}/%{name}/pmi*.h
 %{_includedir}/%{name}/slurm.h
 %{_includedir}/%{name}/slurm_errno.h
 %{_includedir}/%{name}/slurmdb.h
@@ -521,8 +477,6 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_includedir}/%{name}/spank.h
 %{_libdir}/lib{slurm,slurmdb}.so
 %{_libdir}/pkgconfig/%{name}.pc
-%{_libdir}/%{name}/lib/libpmi*.so
-%{_libdir}/%{name}/lib/pkgconfig/*.pc
 %{_libdir}/%{name}/src/sattach/sattach.wrapper.c
 %{_libdir}/%{name}/src/srun/srun.wrapper.c
 %{_mandir}/man3/*.3.*
@@ -553,14 +507,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 # ----------
 
 %files libs
-%dir %{_libdir}/%{name}
-%dir %{_libdir}/%{name}/lib
-%dir %{_modulesdir}/pmi
 %{_libdir}/libslurm.so.*
 %{_libdir}/libslurmdb.so.*
 %{_libdir}/libslurmfull-*.so
-%{_libdir}/%{name}/lib/libpmi*.so.*
-%{_modulesdir}/pmi/*
 
 # -------------
 # Slurm-rrdtool
@@ -717,6 +666,12 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Tue Jul 2 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-3
+- Do not install slurm implementation of libpmi/pmi2 libraries
+- in favor of the faster implementation provided by pmix
+- Remove pmi environment module formerly used to select the slurm
+- vs pmix implementations of libpmi/pmi2
+
 * Wed Jun 19 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-2
 - Correct the configure for pmix
 - Correct the slurm_pmix_soname patch

@@ -1,0 +1,22 @@
+diff --git a/Makefile.am b/Makefile.am
+index 064e992d53..10859a78a5 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -29,7 +29,6 @@ EXTRA_DIST =			\
+ 	META
+ 
+ pkginclude_HEADERS =		\
+-	slurm/pmi.h		\
+ 	slurm/slurm.h 		\
+ 	slurm/slurmdb.h 	\
+ 	slurm/slurm_errno.h	\
+diff --git a/contribs/Makefile.am b/contribs/Makefile.am
+index 2a2d1f2c82..d8d268c0e7 100644
+--- a/contribs/Makefile.am
++++ b/contribs/Makefile.am
+@@ -1,4 +1,4 @@
+-SUBDIRS = lua mic nss_slurm openlava pam pam_slurm_adopt perlapi pmi pmi2 seff sgather sgi sjobexit torque
++SUBDIRS = lua mic nss_slurm openlava pam pam_slurm_adopt perlapi seff sgather sgi sjobexit torque
+ 
+ EXTRA_DIST = \
+ 	make-3.81.slurm.patch	\

@@ -1,6 +1,8 @@
+diff --git a/src/api/Makefile.am b/src/api/Makefile.am
+index d7e9d171cd..93ad848aeb 100644
 --- a/src/api/Makefile.am
 +++ b/src/api/Makefile.am
-@@ -44,12 +44,7 @@
+@@ -44,12 +44,7 @@ current = $(SLURM_API_CURRENT)
  age     = $(SLURM_API_AGE)
  rev     = $(SLURM_API_REVISION)
  
@@ -14,7 +16,7 @@
  
  # BUILT_SOURCES tells automake that when "make" is called, these targets
  # need to be built before anything else.
-@@ -137,7 +132,7 @@
+@@ -157,7 +152,7 @@ libslurmfull_la_SOURCES =
  libslurmfull_la_LIBADD = $(convenience_libs)
  libslurmfull_la_LDFLAGS        = \
          $(LIB_LDFLAGS) \

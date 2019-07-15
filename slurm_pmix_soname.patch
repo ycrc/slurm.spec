@@ -1,23 +1,89 @@
 diff --git a/src/plugins/mpi/pmix/mpi_pmix.c b/src/plugins/mpi/pmix/mpi_pmix.c
-index bbb947616c..65ec00ad73 100644
+index bbb947616c..b284af63f2 100644
 --- a/src/plugins/mpi/pmix/mpi_pmix.c
 +++ b/src/plugins/mpi/pmix/mpi_pmix.c
-@@ -105,10 +105,17 @@ static void *_libpmix_open(void)
+@@ -89,6 +89,8 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+ 
+ void *libpmix_plug = NULL;
+ 
++static const char *pmix_libraries[] = { "libpmix.so", "libpmix.so.2", "libpmix.so.1" };
++
+ static void _libpmix_close(void *lib_plug)
+ {
+ 	xassert(lib_plug);
+@@ -99,15 +101,20 @@ static void *_libpmix_open(void)
+ {
+ 	void *lib_plug = NULL;
+ 	char *full_path = NULL;
++	size_t sz = 0;
+ 
+ #ifdef PMIXP_V1_LIBPATH
+ 	xstrfmtcat(full_path, "%s/", PMIXP_V1_LIBPATH);
  #elif defined PMIXP_V2_LIBPATH
  	xstrfmtcat(full_path, "%s/", PMIXP_V2_LIBPATH);
  #endif
 -	xstrfmtcat(full_path, "libpmix.so");
-+	xstrfmtcat(full_path, "libpmix.so.2");
- 	lib_plug = dlopen(full_path, RTLD_LAZY | RTLD_GLOBAL);
- 	xfree(full_path);
- 
-+	if (!lib_plug) {
-+		dlerror();
-+		xstrfmtcat(full_path, "libpmix.so.1");
+-	lib_plug = dlopen(full_path, RTLD_LAZY | RTLD_GLOBAL);
+-	xfree(full_path);
++
++	while (!lib_plug && (sz < sizeof(pmix_libraries)/sizeof(pmix_libraries[0]))) {
++		xstrfmtcat(full_path, "%s", pmix_libraries[sz]);
 +		lib_plug = dlopen(full_path, RTLD_LAZY | RTLD_GLOBAL);
 +		xfree(full_path);
++		++sz;
 +	}
-+
+ 
  	if (lib_plug && (HAVE_PMIX_VER != pmixp_lib_get_version())) {
  		PMIXP_ERROR("pmi/pmix: incorrect PMIx library version loaded %d was loaded, required %d version",
- 			    pmixp_lib_get_version(), (int)HAVE_PMIX_VER);
+diff --git a/src/plugins/mpi/pmix/pmixp_dconn_ucx.c b/src/plugins/mpi/pmix/pmixp_dconn_ucx.c
+index f6c91adc93..650fb7d5ff 100644
+--- a/src/plugins/mpi/pmix/pmixp_dconn_ucx.c
++++ b/src/plugins/mpi/pmix/pmixp_dconn_ucx.c
+@@ -140,6 +140,8 @@ static struct io_operations _progress_ops = {
+ 	.handle_read = _progress_read
+ };
+ 
++static const char *ucx_libraries[] = { "libucp.so", "libucp.so.0" };
++
+ static void *_ucx_init(int nodeid, pmixp_p2p_data_t direct_hdr);
+ static void _ucx_fini(void *_priv);
+ static int _ucx_connect(void *_priv, void *ep_data, size_t ep_len,
+@@ -161,15 +163,20 @@ static int _load_ucx_lib()
+ 	setenv("UCX_MEM_MALLOC_RELOC", "no", 1);
+ 	setenv("UCX_MEM_EVENTS", "no", 1);
+ 
++	size_t sz = 0;
++
+ #ifdef PMIXP_UCX_LIBPATH
+ 	/* If this Slurm build doesn't allow RPATH's
+ 	 * try to open library by it's full path that
+ 	 * we have from autoconf
+ 	 */
+ 	char *full_path = NULL;
+-	xstrfmtcat(full_path, "%s/libucp.so", PMIXP_UCX_LIBPATH);
+-	_ucx_lib_handler = dlopen(full_path, RTLD_LAZY | RTLD_GLOBAL);
+-	xfree(full_path);
++	while (!_ucx_lib_handler && (sz < sizeof(ucx_libraries)/sizeof(ucx_libraries[0]))) {
++		xstrfmtcat(full_path, "%s/%s", PMIXP_UCX_LIBPATH, ucx_libraries[sz]);
++		_ucx_lib_handler = dlopen(full_path, RTLD_LAZY | RTLD_GLOBAL);
++		xfree(full_path);
++		++sz;
++	}
+ 	if (_ucx_lib_handler) {
+ 		/* successful, exit now */
+ 		return SLURM_SUCCESS;
+@@ -178,7 +185,13 @@ static int _load_ucx_lib()
+ 	 * known by dynamic linker.
+ 	 */
+ #endif
+-	_ucx_lib_handler = dlopen("libucp.so", RTLD_LAZY | RTLD_GLOBAL);
++	sz = 0;
++	while (!_ucx_lib_handler && (sz < sizeof(ucx_libraries)/sizeof(ucx_libraries[0]))) {
++		xstrfmtcat(full_path, "%s", ucx_libraries[sz]);
++		_ucx_lib_handler = dlopen(full_path, RTLD_LAZY | RTLD_GLOBAL);
++		xfree(full_path);
++		++sz;
++	}
+ 	if (!_ucx_lib_handler) {
+ 		char *err = dlerror();
+ 		PMIXP_ERROR("Cannot open UCX lib: %s", (err) ? err : "unknown");

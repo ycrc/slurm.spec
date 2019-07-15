@@ -1,5 +1,5 @@
 # Upstream tarballs use an additional release number
-%global ups_rel 1
+%global ups_rel 2
 
 %if "%{ups_rel}" == "1"
 %global name_version %{name}-%{version}
@@ -11,8 +11,8 @@
 %undefine _strict_symbol_defs_build
 
 Name:           slurm
-Version:        19.05.0
-Release:        5%{?dist}
+Version:        19.05.1
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -25,13 +25,10 @@ Source5:        slurm-setuser.in
 
 # Upstream bug #4449: release-style versioning of libslurmfull
 Patch0:         slurm_libslurmfull_version.patch
-# Upstream bug #7197: fix 19.05.0 testsuite
-Patch1:         slurm_fix_testsuite.patch
 
 # Build-related patches
 Patch10:        slurm_perlapi_rpaths.patch
 Patch11:        slurm_html_doc_path.patch
-Patch12:        slurm_doc_fix.patch
 Patch13:        slurm_without_cray.patch
 Patch14:        slurm_without_pmi.patch
 
@@ -55,7 +52,9 @@ BuildRequires:  python3
 BuildRequires:  systemd
 
 BuildRequires:  hdf5-devel
+BuildRequires:  numactl-devel
 BuildRequires:  pam-devel
+BuildRequires:  rdma-core-devel
 BuildRequires:  pkgconfig(gtk+-2.0)
 BuildRequires:  pkgconfig(hwloc)
 BuildRequires:  pkgconfig(libcurl)
@@ -69,12 +68,11 @@ BuildRequires:  pkgconfig(munge)
 BuildRequires:  pkgconfig(ncurses)
 BuildRequires:  pkgconfig(pmix) >= 2.0.0
 BuildRequires:  pkgconfig(zlib)
-BuildRequires:  readline-devel
+BuildRequires:  pkgconfig(readline)
 
-# follow arch exclusions for these devel packages
-%ifnarch s390 s390x %{arm}
-BuildRequires:  rdma-core-devel
-BuildRequires:  numactl-devel
+# follow arch-inclusions for ucx
+%ifarch aarch64 ppc64le x86_64
+BuildRequires:  pkgconfig(ucx)
 %endif
 
 # exclude upstream-deprecated 32-bit architectures
@@ -83,6 +81,9 @@ ExcludeArch:    i686
 
 Requires:       munge
 Requires:       pmix >= 2.0.0
+%ifarch aarch64 ppc64le x86_64
+Requires:       ucx
+%endif
 %{?systemd_requires}
 
 %description
@@ -203,10 +204,8 @@ Torque wrapper scripts used for helping migrate from Torque/PBS to Slurm.
 %prep
 %setup -q -n %{name_version}
 %patch0 -p1
-%patch1 -p1
 %patch10 -p1
 %patch11 -p1
-%patch12 -p1
 %patch13 -p1
 %patch14 -p1
 %patch20 -p1
@@ -233,6 +232,9 @@ automake --no-force
   --prefix=%{_prefix} \
   --sysconfdir=%{_sysconfdir}/%{name} \
   --with-pam_dir=%{_libdir}/security \
+%ifarch aarch64 ppc64le x86_64
+  --with-ucx=%{_prefix} \
+%endif
   --enable-shared \
   --enable-x11 \
   --disable-static \
@@ -677,6 +679,11 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Mon Jul 15 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.1-1
+- Release of 19.05.1
+- Closes security issue (CVE-2019-12838)
+- Configure for UCX support on supported arches
+
 * Tue Jul 2 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-5
 - Do not install slurm implementation of libpmi/pmi2 libraries
 - in favor of the faster implementation provided by pmix

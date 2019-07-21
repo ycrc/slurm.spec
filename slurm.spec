@@ -198,14 +198,6 @@ Requires: %{name}-perlapi%{?_isa} = %{version}-%{release}
 %description openlava
 OpenLava wrapper scripts used for helping migrate from OpenLava/LSF to Slurm.
 
-%package perlapi
-Summary: Perl API to Slurm
-Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
-Requires: %{name}-libs%{?_isa} = %{version}-%{release}
-%description perlapi
-Perl API package for Slurm.  This package includes the perl API to provide a
-helpful interface to Slurm through Perl.
-
 %package pam_slurm
 Summary: PAM module for restricting access to compute nodes via Slurm
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
@@ -214,6 +206,14 @@ This module restricts access to compute nodes in a cluster where Slurm
 is in use.  Access is granted to root, any user with a Slurm-launched job
 currently running on the node, or any user who has allocated resources
 on the node according to Slurm.
+
+%package perlapi
+Summary: Perl API to Slurm
+Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+%description perlapi
+Perl API package for Slurm.  This package includes the perl API to provide a
+helpful interface to Slurm through Perl.
 
 %package torque
 Summary: Torque/PBS wrappers for transition from Torque/PBS to Slurm
@@ -523,6 +523,23 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/libslurm.so.*
 %{_libdir}/libslurmfull-*.so
 
+# ---------
+# Slurm-pmi
+# ---------
+
+%files pmi
+%{_libdir}/libpmi.so.0*
+%{_libdir}/libpmi2.so.0*
+
+# ---------------
+# Slurm-pmi-devel
+# ---------------
+
+%files pmi-devel
+%{_includedir}/%{name}/pmi*.h
+%{_libdir}/libpmi.so
+%{_libdir}/libpmi2.so
+
 # -------------
 # Slurm-rrdtool
 # -------------
@@ -606,6 +623,14 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_mandir}/man1/bsub.1*
 %{_mandir}/man1/lsid.1*
 
+# ---------------
+# Slurm-pam_slurm
+# ---------------
+
+%files pam_slurm
+%{_libdir}/security/pam_slurm.so
+%{_libdir}/security/pam_slurm_adopt.so
+
 # -------------
 # Slurm-perlapi
 # -------------
@@ -621,31 +646,6 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{perl_vendorarch}/auto/Slurm/Slurm.so
 %{perl_vendorarch}/auto/Slurmdb/Slurmdb.so
 %{perl_vendorarch}/auto/Slurmdb/autosplit.ix
-
-# ---------
-# Slurm-pmi
-# ---------
-
-%files pmi
-%{_libdir}/libpmi.so.0*
-%{_libdir}/libpmi2.so.0*
-
-# ---------------
-# Slurm-pmi-devel
-# ---------------
-
-%files pmi-devel
-%{_includedir}/%{name}/pmi*.h
-%{_libdir}/libpmi.so
-%{_libdir}/libpmi2.so
-
-# ---------------
-# Slurm-pam_slurm
-# ---------------
-
-%files pam_slurm
-%{_libdir}/security/pam_slurm.so
-%{_libdir}/security/pam_slurm_adopt.so
 
 # ------------
 # Slurm-torque

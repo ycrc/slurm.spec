@@ -7,12 +7,19 @@
 %global name_version %{name}-%{version}-%{ups_rel}
 %endif
 
+# follow arch-inclusions for ucx
+%ifarch aarch64 ppc64le x86_64
+%bcond_without ucx
+%else
+%bcond_with ucx
+%endif
+
 # Allow linkage with undefined symbols (disable -z,defs)
 %undefine _strict_symbol_defs_build
 
 Name:           slurm
 Version:        19.05.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -29,8 +36,7 @@ Patch0:         slurm_libslurmfull_version.patch
 # Build-related patches
 Patch10:        slurm_perlapi_rpaths.patch
 Patch11:        slurm_html_doc_path.patch
-Patch13:        slurm_without_cray.patch
-Patch14:        slurm_without_pmi.patch
+Patch12:        slurm_without_cray.patch
 
 # Fedora-related patches
 Patch20:        slurm_pmix_soname.patch
@@ -48,31 +54,30 @@ BuildRequires:  perl-macros
 BuildRequires:  perl-podlators
 BuildRequires:  pkgconf
 BuildRequires:  pkgconfig(check)
+BuildRequires:  pkgconfig(lua)
 BuildRequires:  python3
 BuildRequires:  systemd
 
+BuildRequires:  freeipmi-devel
+BuildRequires:  gtk2-devel
 BuildRequires:  hdf5-devel
+BuildRequires:  hwloc-devel
+BuildRequires:  libcurl-devel
+BuildRequires:  libssh2-devel
+BuildRequires:  lz4-devel
+BuildRequires:  mariadb-devel
+BuildRequires:  munge-devel
+BuildRequires:  ncurses-devel
 BuildRequires:  numactl-devel
 BuildRequires:  pam-devel
+BuildRequires:  pmix-devel
 BuildRequires:  rdma-core-devel
-BuildRequires:  pkgconfig(gtk+-2.0)
-BuildRequires:  pkgconfig(hwloc)
-BuildRequires:  pkgconfig(libcurl)
-BuildRequires:  pkgconfig(libfreeipmi)
-BuildRequires:  pkgconfig(liblz4)
-BuildRequires:  pkgconfig(librrd)
-BuildRequires:  pkgconfig(libssh2)
-BuildRequires:  pkgconfig(lua)
-BuildRequires:  pkgconfig(mariadb)
-BuildRequires:  pkgconfig(munge)
-BuildRequires:  pkgconfig(ncurses)
-BuildRequires:  pkgconfig(pmix) >= 2.0.0
-BuildRequires:  pkgconfig(zlib)
-BuildRequires:  pkgconfig(readline)
+BuildRequires:  readline-devel
+BuildRequires:  rrdtool-devel
+BuildRequires:  zlib-devel
 
-# follow arch-inclusions for ucx
-%ifarch aarch64 ppc64le x86_64
-BuildRequires:  pkgconfig(ucx)
+%if %{with ucx}
+BuildRequires:  ucx-devel
 %endif
 
 # exclude upstream-deprecated 32-bit architectures
@@ -80,8 +85,8 @@ ExcludeArch:    armv7hl
 ExcludeArch:    i686
 
 Requires:       munge
-Requires:       pmix >= 2.0.0
-%ifarch aarch64 ppc64le x86_64
+Requires:       pmix
+%if %{with ucx}
 Requires:       ucx
 %endif
 %{?systemd_requires}
@@ -120,6 +125,22 @@ and their respective man pages.
 Summary: Slurm shared libraries
 %description libs
 Slurm shared libraries.
+
+%package pmi
+Summary: The %{name} implementation of libpmi and libpmi2
+Requires: %{name}%{?_isa} = %{version}-%{release}
+Conflicts: pmix-pmi
+%description pmi
+The %{name}-pmi package contains the %{name} implementation of
+the libpmi and libpmi2 libraries.
+
+%package pmi-devel
+Summary: Development files for %{name}-pmi
+Requires: %{name}-pmi%{?_isa} = %{version}-%{release}
+Conflicts: pmix-pmi-devel
+%description pmi-devel
+The %{name}-pmi-devel package contains the development files for
+the libpmi and libpmi2 libraries.
 
 %package rrdtool
 Summary: Slurm rrdtool external sensor plugin
@@ -206,8 +227,7 @@ Torque wrapper scripts used for helping migrate from Torque/PBS to Slurm.
 %patch0 -p1
 %patch10 -p1
 %patch11 -p1
-%patch13 -p1
-%patch14 -p1
+%patch12 -p1
 %patch20 -p1
 %patch21 -p1
 %patch22 -p1
@@ -232,7 +252,7 @@ automake --no-force
   --prefix=%{_prefix} \
   --sysconfdir=%{_sysconfdir}/%{name} \
   --with-pam_dir=%{_libdir}/security \
-%ifarch aarch64 ppc64le x86_64
+%if %{with ucx}
   --with-ucx=%{_prefix} \
 %endif
   --enable-shared \
@@ -321,19 +341,6 @@ install -d -m 0755 %{buildroot}%{_var}/spool/%{name}/d
 touch %{buildroot}%{_rundir}/%{name}/slurmctld.pid
 touch %{buildroot}%{_rundir}/%{name}/slurmd.pid
 touch %{buildroot}%{_rundir}/%{name}/slurmdbd.pid
-
-# install pkgconfig file slurm.pc
-install -d -m 0755 %{buildroot}%{_libdir}/pkgconfig
-cat >%{buildroot}%{_libdir}/pkgconfig/%{name}.pc <<EOF
-includedir=%{_includedir}/%{name}
-libdir=%{_libdir}
-
-Name: %{name}
-Version: %{version}
-Description: Slurm development library
-Cflags: -I\${includedir}
-Libs: -L\${libdir} -lslurm
-EOF
 
 # install desktop file for sview GTK+ program
 desktop-file-install \
@@ -483,7 +490,6 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_includedir}/%{name}/smd_ns.h
 %{_includedir}/%{name}/spank.h
 %{_libdir}/lib{slurm,slurmdb}.so
-%{_libdir}/pkgconfig/%{name}.pc
 %{_libdir}/%{name}/src/sattach/sattach.wrapper.c
 %{_libdir}/%{name}/src/srun/srun.wrapper.c
 %{_mandir}/man3/*.3.*
@@ -616,6 +622,23 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{perl_vendorarch}/auto/Slurmdb/Slurmdb.so
 %{perl_vendorarch}/auto/Slurmdb/autosplit.ix
 
+# ---------
+# Slurm-pmi
+# ---------
+
+%files pmi
+%{_libdir}/libpmi.so.0*
+%{_libdir}/libpmi2.so.0*
+
+# ---------------
+# Slurm-pmi-devel
+# ---------------
+
+%files pmi-devel
+%{_includedir}/%{name}/pmi*.h
+%{_libdir}/libpmi.so
+%{_libdir}/libpmi2.so
+
 # ---------------
 # Slurm-pam_slurm
 # ---------------
@@ -679,6 +702,11 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Sun Jul 21 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.1-2
+- Create slurm-pmi and slurm-pmi-devel subpackages for pmi/pmi2 libs
+- Remove rpm-generated pkgconfig files until upstream provides them
+- Do not pull dependencies with pkgconfig unless package uses it
+
 * Mon Jul 15 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.1-1
 - Release of 19.05.1
 - Closes security issue (CVE-2019-12838)

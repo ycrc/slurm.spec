@@ -19,7 +19,7 @@
 
 Name:           slurm
 Version:        19.05.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -702,6 +702,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Fri Jul 26 2019 Fedora Release Engineering <releng@fedoraproject.org> - 19.05.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
 * Sun Jul 21 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.1-2
 - Create slurm-pmi and slurm-pmi-devel subpackages for pmi/pmi2 libs
 - Remove rpm-generated pkgconfig files until upstream provides them

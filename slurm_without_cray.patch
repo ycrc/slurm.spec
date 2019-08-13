@@ -79,14 +79,17 @@ index 09fdfd2313..570af23c4a 100644
  # Each plugin here needs a plugin_id, here are the currect plug_ids
  # for each plugin.
 diff --git a/src/plugins/switch/Makefile.am b/src/plugins/switch/Makefile.am
-index ddfe019a65..39a2b3eb7f 100644
+index c58f51329d..39a2b3eb7f 100644
 --- a/src/plugins/switch/Makefile.am
 +++ b/src/plugins/switch/Makefile.am
-@@ -1,3 +1,3 @@
+@@ -1,7 +1,3 @@
  # Makefile for switch plugins
  
--SUBDIRS = cray_aries generic none
-+SUBDIRS = generic none
+ SUBDIRS = generic none
+-
+-if WITH_SWITCH_CRAY_ARIES
+-SUBDIRS += cray_aries
+-endif
 diff --git a/src/plugins/task/Makefile.am b/src/plugins/task/Makefile.am
 index 8d2a36eb68..607af1cb7c 100644
 --- a/src/plugins/task/Makefile.am

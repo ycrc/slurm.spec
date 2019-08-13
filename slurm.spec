@@ -1,5 +1,5 @@
 # Upstream tarballs use an additional release number
-%global ups_rel 2
+%global ups_rel 1
 
 %if "%{ups_rel}" == "1"
 %global name_version %{name}-%{version}
@@ -18,8 +18,8 @@
 %undefine _strict_symbol_defs_build
 
 Name:           slurm
-Version:        19.05.1
-Release:        3%{?dist}
+Version:        19.05.2
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -702,6 +702,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Tue Aug 13 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.2-1
+- Release of 19.05.2
+
 * Fri Jul 26 2019 Fedora Release Engineering <releng@fedoraproject.org> - 19.05.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 

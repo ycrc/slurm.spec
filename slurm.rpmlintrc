@@ -1,4 +1,3 @@
-from Config import *
 addFilter("E: shared-lib-without-dependency-information")
 addFilter("E: missing-dependency-to-logrotate")
 addFilter("W: manual-page-warning")

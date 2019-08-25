@@ -19,7 +19,7 @@
 
 Name:           slurm
 Version:        19.05.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -702,6 +702,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Sun Aug 25 2019 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 19.05.2-2
+- Rebuilt for hwloc-2.0
+
 * Tue Aug 13 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.2-1
 - Release of 19.05.2
 

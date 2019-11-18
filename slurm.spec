@@ -1,5 +1,5 @@
 # Upstream tarballs use an additional release number
-%global ups_rel 2
+%global ups_rel 1
 
 %if "%{ups_rel}" == "1"
 %global name_version %{name}-%{version}
@@ -15,7 +15,7 @@
 %endif
 
 Name:           slurm
-Version:        19.05.3
+Version:        19.05.4
 Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
@@ -237,8 +237,8 @@ aclocal -I auxdir
 autoconf
 automake --no-force
 # use -z lazy to allow dlopen with unresolved symbols
+export LDFLAGS="%{build_ldflags} -Wl,-z,lazy"
 %configure \
-  LDFLAGS="$LDFLAGS -Wl,-z,lazy" \
   --prefix=%{_prefix} \
   --sysconfdir=%{_sysconfdir}/%{name} \
   --with-pam_dir=%{_libdir}/security \
@@ -692,6 +692,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Mon Nov 18 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.4-1
+- Release of 19.05.4
+
 * Mon Oct 7 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.3-1
 - Release of 19.05.3
 

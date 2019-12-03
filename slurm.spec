@@ -49,8 +49,10 @@ BuildRequires:  perl-ExtUtils-MakeMaker
 BuildRequires:  perl-interpreter
 BuildRequires:  perl-macros
 BuildRequires:  perl-podlators
+%if ! 0%{?el7}
 BuildRequires:  pkgconf
 BuildRequires:  pkgconfig(check)
+%endif
 BuildRequires:  pkgconfig(lua)
 BuildRequires:  python3
 BuildRequires:  systemd
@@ -68,6 +70,9 @@ BuildRequires:  numactl-devel
 BuildRequires:  pam-devel
 BuildRequires:  pmix-devel
 BuildRequires:  rdma-core-devel
+%if 0%{?el7}
+BuildRequires:  libibmad-devel
+%endif
 BuildRequires:  readline-devel
 BuildRequires:  rrdtool-devel
 BuildRequires:  zlib-devel
@@ -278,7 +283,9 @@ s|^dir_tmpfiles_d=.*|dir_tmpfiles_d="%{_tmpfilesdir}"|g;' \
 %check
 # The test binaries need LD_LIBRARY_PATH to find the compiled slurm library
 # in the build tree.
+%if ! 0%{?el7}
 %make_build LD_LIBRARY_PATH="%{buildroot}%{_libdir};%{_libdir}" check
+%endif
 
 %install
 %make_install
@@ -401,52 +408,185 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %dir %{_var}/spool/%{name}/d
 %config(noreplace) %{_sysconfdir}/%{name}/cgroup.conf
 %config(noreplace) %{_sysconfdir}/%{name}/slurm.conf
+%if 0%{?el7}
+%{_bindir}/sacct
+%{_bindir}/sacctmgr
+%{_bindir}/salloc
+%{_bindir}/sattach
+%{_bindir}/sbatch
+%{_bindir}/sbcast
+%{_bindir}/scancel
+%{_bindir}/scontrol
+%{_bindir}/sdiag
+%{_bindir}/sh5util
+%{_bindir}/sinfo
+%{_bindir}/sprio
+%{_bindir}/squeue
+%{_bindir}/sreport
+%{_bindir}/srun
+%{_bindir}/sshare
+%{_bindir}/sstat
+%{_bindir}/strigger
+%else
 %{_bindir}/{sacct,sacctmgr,salloc,sattach,sbatch,sbcast}
 %{_bindir}/{scancel,scontrol,sdiag,sh5util,sinfo,sprio}
 %{_bindir}/{squeue,sreport,srun,sshare,sstat,strigger}
+%endif
 %{_bindir}/%{name}-setuser
+%if 0%{?el7}
+%{_libdir}/%{name}/accounting_storage_filetxt.so
+%{_libdir}/%{name}/accounting_storage_none.so
+%{_libdir}/%{name}/accounting_storage_slurmdbd.so
+%{_libdir}/%{name}/acct_gather_energy_ibmaem.so
+%{_libdir}/%{name}/acct_gather_energy_ipmi.so
+%{_libdir}/%{name}/acct_gather_energy_none.so
+%{_libdir}/%{name}/acct_gather_energy_rapl.so
+%{_libdir}/%{name}/acct_gather_energy_xcc.so
+%{_libdir}/%{name}/acct_gather_filesystem_lustre.so
+%{_libdir}/%{name}/acct_gather_filesystem_none.so
+%{_libdir}/%{name}/acct_gather_interconnect_none.so
+%{_libdir}/%{name}/acct_gather_interconnect_ofed.so
+%{_libdir}/%{name}/acct_gather_profile_hdf5.so
+%{_libdir}/%{name}/acct_gather_profile_influxdb.so
+%{_libdir}/%{name}/acct_gather_profile_none.so
+%else
 %{_libdir}/%{name}/accounting_storage_{filetxt,none,slurmdbd}.so
 %{_libdir}/%{name}/acct_gather_energy_{ibmaem,ipmi,none,rapl,xcc}.so
 %{_libdir}/%{name}/acct_gather_filesystem_{lustre,none}.so
 %{_libdir}/%{name}/acct_gather_interconnect_{none,ofed}.so
 %{_libdir}/%{name}/acct_gather_profile_{hdf5,influxdb,none}.so
+%endif
 %{_libdir}/%{name}/auth_munge.so
 %{_libdir}/%{name}/burst_buffer_generic.so
+%if 0%{?el7}
+%{_libdir}/%{name}/checkpoint_none.so
+%{_libdir}/%{name}/checkpoint_ompi.so
+%else
 %{_libdir}/%{name}/checkpoint_{none,ompi}.so
+%endif
 %{_libdir}/%{name}/cli_filter_none.so
 %{_libdir}/%{name}/core_spec_none.so
+%if 0%{?el7}
+%{_libdir}/%{name}/cred_munge.so
+%{_libdir}/%{name}/cred_none.so
+%else
 %{_libdir}/%{name}/cred_{munge,none}.so
+%endif
 %{_libdir}/%{name}/ext_sensors_none.so
+%if 0%{?el7}
+%{_libdir}/%{name}/gres_gpu.so
+%{_libdir}/%{name}/gres_mic.so
+%{_libdir}/%{name}/gres_mps.so
+%{_libdir}/%{name}/gres_nic.so
+%else
 %{_libdir}/%{name}/gres_{gpu,mic,mps,nic}.so
+%endif
 %{_libdir}/%{name}/gpu_generic.so
 %{_libdir}/%{name}/job_container_none.so
 %{_libdir}/%{name}/job_submit_all_partitions.so
 %{_libdir}/%{name}/job_submit_lua.so
 %{_libdir}/%{name}/job_submit_require_timelimit.so
 %{_libdir}/%{name}/job_submit_throttle.so
+%if 0%{?el7}
+%{_libdir}/%{name}/jobacct_gather_cgroup.so
+%{_libdir}/%{name}/jobacct_gather_linux.so
+%{_libdir}/%{name}/jobacct_gather_none.so
+%{_libdir}/%{name}/jobcomp_elasticsearch.so
+%{_libdir}/%{name}/jobcomp_filetxt.so
+%{_libdir}/%{name}/jobcomp_mysql.so
+%{_libdir}/%{name}/jobcomp_none.so
+%{_libdir}/%{name}/jobcomp_script.so
+%else
 %{_libdir}/%{name}/jobacct_gather_{cgroup,linux,none}.so
 %{_libdir}/%{name}/jobcomp_{elasticsearch,filetxt,mysql,none,script}.so
+%endif
 %{_libdir}/%{name}/launch_slurm.so
+%if 0%{?el7}
+%{_libdir}/%{name}/layouts_power_cpufreq.so
+%{_libdir}/%{name}/layouts_power_default.so
+%else
 %{_libdir}/%{name}/layouts_power_{cpufreq,default}.so
+%endif
 %{_libdir}/%{name}/layouts_unit_default.so
+%if 0%{?el7}
+%{_libdir}/%{name}/mcs_account.so
+%{_libdir}/%{name}/mcs_group.so
+%{_libdir}/%{name}/mcs_none.so
+%{_libdir}/%{name}/mcs_user.so
+%{_libdir}/%{name}/mpi_none.so
+%{_libdir}/%{name}/mpi_openmpi.so
+%{_libdir}/%{name}/mpi_pmi2.so
+%{_libdir}/%{name}/mpi_pmix*.so
+%else
 %{_libdir}/%{name}/mcs_{account,group,none,user}.so
 %{_libdir}/%{name}/mpi_{none,openmpi,pmi2,pmix*}.so
+%endif
 %{_libdir}/%{name}/node_features_knl_generic.so
 %{_libdir}/%{name}/power_none.so
+%if 0%{?el7}
+%{_libdir}/%{name}/preempt_none.so
+%{_libdir}/%{name}/preempt_partition_prio.so
+%{_libdir}/%{name}/preempt_qos.so
+%{_libdir}/%{name}/priority_basic.so
+%{_libdir}/%{name}/priority_multifactor.so
+%{_libdir}/%{name}/proctrack_cgroup.so
+%{_libdir}/%{name}/proctrack_linuxproc.so
+%{_libdir}/%{name}/proctrack_pgid.so
+%{_libdir}/%{name}/route_default.so
+%{_libdir}/%{name}/route_topology.so
+%{_libdir}/%{name}/sched_backfill.so
+%{_libdir}/%{name}/sched_builtin.so
+%{_libdir}/%{name}/sched_hold.so
+%{_libdir}/%{name}/select_cons_res.so
+%{_libdir}/%{name}/select_cons_tres.so
+%{_libdir}/%{name}/select_linear.so
+%else
 %{_libdir}/%{name}/preempt_{none,partition_prio,qos}.so
 %{_libdir}/%{name}/priority_{basic,multifactor}.so
 %{_libdir}/%{name}/proctrack_{cgroup,linuxproc,pgid}.so
 %{_libdir}/%{name}/route_{default,topology}.so
 %{_libdir}/%{name}/sched_{backfill,builtin,hold}.so
 %{_libdir}/%{name}/select_{cons_res,cons_tres,linear}.so
+%endif
 %{_libdir}/%{name}/site_factor_none.so
 %{_libdir}/%{name}/slurmctld_nonstop.so
+%if 0%{?el7}
+%{_libdir}/%{name}/switch_generic.so
+%{_libdir}/%{name}/switch_none.so
+%{_libdir}/%{name}/task_affinity.so
+%{_libdir}/%{name}/task_cgroup.so
+%{_libdir}/%{name}/task_none.so
+%{_libdir}/%{name}/topology_3d_torus.so
+%{_libdir}/%{name}/topology_hypercube.so
+%{_libdir}/%{name}/topology_node_rank.so
+%{_libdir}/%{name}/topology_none.so
+%{_libdir}/%{name}/topology_tree.so
+%{_mandir}/man1/sacct.1*
+%{_mandir}/man1/sacctmgr.1*
+%{_mandir}/man1/salloc.1*
+%{_mandir}/man1/sattach.1*
+%{_mandir}/man1/sbatch.1*
+%{_mandir}/man1/sbcast.1*
+%{_mandir}/man1/scancel.1*
+%{_mandir}/man1/scontrol.1*
+%{_mandir}/man1/sdiag.1*
+%{_mandir}/man1/sh5util.1*
+%{_mandir}/man1/sinfo.1*
+%{_mandir}/man1/sprio.1*
+%{_mandir}/man1/squeue.1*
+%{_mandir}/man1/sreport.1*
+%{_mandir}/man1/srun.1*
+%{_mandir}/man1/sshare.1*
+%{_mandir}/man1/sstat.1*
+%{_mandir}/man1/strigger.1*
+%else
 %{_libdir}/%{name}/switch_{generic,none}.so
 %{_libdir}/%{name}/task_{affinity,cgroup,none}.so
 %{_libdir}/%{name}/topology_{3d_torus,hypercube,node_rank,none,tree}.so
 %{_mandir}/man1/{sacct,sacctmgr,salloc,sattach,sbatch,sbcast}.1*
 %{_mandir}/man1/{scancel,scontrol,sdiag,sh5util,sinfo,sprio}.1*
 %{_mandir}/man1/{squeue,sreport,srun,sshare,sstat,strigger}.1*
+%endif
 %{_mandir}/man1/slurm.1*
 %{_mandir}/man5/acct_gather.conf.5*
 %{_mandir}/man5/burst_buffer.conf.5*

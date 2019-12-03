@@ -60,7 +60,6 @@ BuildRequires:  gtk2-devel
 BuildRequires:  hdf5-devel
 BuildRequires:  hwloc-devel
 BuildRequires:  libcurl-devel
-BuildRequires:  libssh2-devel
 BuildRequires:  lz4-devel
 BuildRequires:  mariadb-devel
 BuildRequires:  munge-devel
@@ -434,12 +433,12 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/mpi_{none,openmpi,pmi2,pmix*}.so
 %{_libdir}/%{name}/node_features_knl_generic.so
 %{_libdir}/%{name}/power_none.so
-%{_libdir}/%{name}/preempt_{job_prio,none,partition_prio,qos}.so
+%{_libdir}/%{name}/preempt_{none,partition_prio,qos}.so
 %{_libdir}/%{name}/priority_{basic,multifactor}.so
-%{_libdir}/%{name}/proctrack_{cgroup,linuxproc,lua,pgid}.so
+%{_libdir}/%{name}/proctrack_{cgroup,linuxproc,pgid}.so
 %{_libdir}/%{name}/route_{default,topology}.so
 %{_libdir}/%{name}/sched_{backfill,builtin,hold}.so
-%{_libdir}/%{name}/select_{cons_res,cons_tres,linear,serial}.so
+%{_libdir}/%{name}/select_{cons_res,cons_tres,linear}.so
 %{_libdir}/%{name}/site_factor_none.so
 %{_libdir}/%{name}/slurmctld_nonstop.so
 %{_libdir}/%{name}/switch_{generic,none}.so
@@ -479,7 +478,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_includedir}/%{name}/slurmdb.h
 %{_includedir}/%{name}/smd_ns.h
 %{_includedir}/%{name}/spank.h
-%{_libdir}/lib{slurm,slurmdb}.so
+%{_libdir}/libslurm.so
 %{_libdir}/%{name}/src/sattach/sattach.wrapper.c
 %{_libdir}/%{name}/src/srun/srun.wrapper.c
 %{_mandir}/man3/*.3.*

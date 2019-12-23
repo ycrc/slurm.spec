@@ -15,7 +15,7 @@
 %endif
 
 Name:           slurm
-Version:        19.05.4
+Version:        19.05.5
 Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
@@ -300,8 +300,8 @@ install -m 0644 -p etc/layouts.d.unit.conf.example \
     %{buildroot}%{_sysconfdir}/%{name}/layouts.d/unit.conf.example
 install -m 0644 -p etc/slurm.conf %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/slurm.conf.example %{buildroot}%{_sysconfdir}/%{name}
-install -m 0644 -p etc/slurmdbd.conf %{buildroot}%{_sysconfdir}/%{name}
-install -m 0644 -p etc/slurmdbd.conf.example %{buildroot}%{_sysconfdir}/%{name}
+install -m 0600 -p etc/slurmdbd.conf %{buildroot}%{_sysconfdir}/%{name}
+install -m 0600 -p etc/slurmdbd.conf.example %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/slurmctld.service %{buildroot}%{_unitdir}
 install -m 0644 -p etc/slurmd.service %{buildroot}%{_unitdir}
 install -m 0644 -p etc/slurmdbd.service %{buildroot}%{_unitdir}
@@ -692,6 +692,10 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Mon Dec 23 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.5-1
+- Release of 19.05.5
+- Closes security issues CVE-2019-19727, CVE-2019-19728
+
 * Mon Nov 18 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.4-1
 - Release of 19.05.4
 

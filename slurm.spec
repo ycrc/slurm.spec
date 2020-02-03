@@ -70,9 +70,6 @@ BuildRequires:  numactl-devel
 BuildRequires:  pam-devel
 BuildRequires:  pmix-devel
 BuildRequires:  rdma-core-devel
-%if 0%{?el7}
-BuildRequires:  libibmad-devel
-%endif
 BuildRequires:  readline-devel
 BuildRequires:  rrdtool-devel
 BuildRequires:  zlib-devel

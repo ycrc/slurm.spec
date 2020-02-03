@@ -442,7 +442,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/acct_gather_filesystem_lustre.so
 %{_libdir}/%{name}/acct_gather_filesystem_none.so
 %{_libdir}/%{name}/acct_gather_interconnect_none.so
-%{_libdir}/%{name}/acct_gather_interconnect_ofed.so
+#%{_libdir}/%{name}/acct_gather_interconnect_ofed.so
 %{_libdir}/%{name}/acct_gather_profile_hdf5.so
 %{_libdir}/%{name}/acct_gather_profile_influxdb.so
 %{_libdir}/%{name}/acct_gather_profile_none.so
